@@ -17,6 +17,7 @@ metadata {
 	definition (name: "Soma Smart Shade", namespace: "semi-structured", author: "Ben A", cstHandler: true) {
 		capability "Battery"
 		capability "Window Shade"
+    capability "Switch Level"
 	}
 
 
@@ -82,8 +83,7 @@ def parse(String description) {
 
 // handle commands
 def open() {
-	log.debug "Executing 'open'"
-
+  log.debug "Executing OPEN"
   if (ip_address){
 		def port
 		if (port){
@@ -102,15 +102,12 @@ def open() {
 
 		sendHubCommand(result)
 		sendEvent(name: "shade", value: "open")
-    log.debug "Executing OPEN"
     log.debug result
 	}
-
 }
 
 def close() {
-	log.debug "Executing 'close'"
-
+  log.debug "Executing CLOSE"
   if (ip_address){
     def port
     if (port){
@@ -128,14 +125,12 @@ def close() {
   )
   sendHubCommand(result)
   sendEvent(name: "shade", value: "close")
-  log.debug "Executing CLOSE"
   log.debug result
   }
 }
 
 def pause() {
-	log.debug "Executing 'pause'"
-
+  log.debug "Executing STOP"
   if (ip_address){
     def port
     if (port){
@@ -153,7 +148,31 @@ def pause() {
   )
   sendHubCommand(result)
   sendEvent(name: "shade", value: "stopped")
-  log.debug "Executing STOP"
+  log.debug result
+  }
+}
+
+def setLevel(data) {
+  log.debug "Executing SET LEVEL"
+  if (ip_address){
+    def port
+    if (port){
+      port = "${port}"
+    } else {
+      port = 3000
+    }
+
+  data = data.toInteger()
+
+  def result = new physicalgraph.device.HubAction(
+    method: "GET",
+    path: "/set_shade_position/${mac_address}/${data}",
+    headers: [
+      HOST: "${ip_address}:${port}"
+      ]
+  )
+  sendHubCommand(result)
+  sendEvent(name: "shade", value: "set level ${data}")
   log.debug result
   }
 }
