@@ -72,14 +72,22 @@ preferences {
     input "mac_address", "text", title: "MAC Address", required: true
 }
 
+
 // parse events into attributes
 def parse(String description) {
-  log.debug "Parsing '${description}'"
   def msg = parseLanMessage(description)
 	log.debug "Parsing '${msg}'"
   def json = msg.json
+	if (json.result == "success") {
+		log.debug "Success"
+		if (json.battery_level){
+			sendEvent(name: "battery", value: json.battery_level)
+		}
+		if (json.position){
+			sendEvent(name: "level", value: json.position)
+		}
+	}
 
-	sendEvent(name: "battery", value: 51)
 	// TODO: handle 'battery' attribute
 	// TODO: handle 'windowShade' attribute
 	// TODO: handle 'supportedWindowShadeCommands' attribute
@@ -104,7 +112,6 @@ def open() {
 			HOST: "${ip_address}:${port}"
 				]
 		)
-
 		sendHubCommand(result)
 		sendEvent(name: "shade", value: "open")
     log.debug result
@@ -226,7 +233,6 @@ def batteryLevel() {
   sendEvent(name: "shade", value: "get battery level")
   log.debug result
   }
-	return(result)
 }
 
 def refresh() {
