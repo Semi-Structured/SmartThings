@@ -15,9 +15,10 @@
 
 metadata {
 	definition (name: "Soma Smart Shade", namespace: "semi-structured", author: "Ben A", cstHandler: true) {
-		capability "Battery"
 		capability "Window Shade"
+		capability "Battery"
     capability "Switch Level"
+		capability "Refresh"
 	}
 
 
@@ -71,10 +72,14 @@ preferences {
     input "mac_address", "text", title: "MAC Address", required: true
 }
 
-
 // parse events into attributes
 def parse(String description) {
-	log.debug "Parsing '${description}'"
+  log.debug "Parsing '${description}'"
+  def msg = parseLanMessage(description)
+	log.debug "Parsing '${msg}'"
+  def json = msg.json
+
+	sendEvent(name: "battery", value: 51)
 	// TODO: handle 'battery' attribute
 	// TODO: handle 'windowShade' attribute
 	// TODO: handle 'supportedWindowShadeCommands' attribute
@@ -175,4 +180,56 @@ def setLevel(data) {
   sendEvent(name: "shade", value: "set level ${data}")
   log.debug result
   }
+}
+
+def getLevel() {
+  log.debug "Executing GET SHADE LEVEL"
+  if (ip_address){
+    def port
+    if (port){
+      port = "${port}"
+    } else {
+      port = 3000
+    }
+
+  def result = new physicalgraph.device.HubAction(
+    method: "GET",
+    path: "/get_shade_state/${mac_address}",
+    headers: [
+      HOST: "${ip_address}:${port}"
+      ]
+  )
+  sendHubCommand(result)
+  sendEvent(name: "shade", value: "get level")
+  log.debug result
+  }
+}
+
+def batteryLevel() {
+  log.debug "Executing GET BATTERY LEVEL"
+  if (ip_address){
+    def port
+    if (port){
+      port = "${port}"
+    } else {
+      port = 3000
+    }
+
+  def result = new physicalgraph.device.HubAction(
+    method: "GET",
+    path: "/get_battery_level/${mac_address}",
+    headers: [
+      HOST: "${ip_address}:${port}"
+      ],
+  )
+  sendHubCommand(result)
+  sendEvent(name: "shade", value: "get battery level")
+  log.debug result
+  }
+	return(result)
+}
+
+def refresh() {
+	getLevel()
+	batteryLevel()
 }
