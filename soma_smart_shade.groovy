@@ -17,7 +17,7 @@ metadata {
 	definition (name: "Soma Smart Shade", namespace: "semi-structured", author: "Ben A", cstHandler: true) {
 		capability "Window Shade"
 		capability "Battery"
-    capability "Switch Level"
+		capability "Switch Level"
 		capability "Refresh"
 	}
 
@@ -29,11 +29,9 @@ metadata {
   tiles(scale: 2) {
     multiAttributeTile(name:"windowShade", type: "generic", width: 6, height: 4) {
       tileAttribute("device.windowShade", key: "PRIMARY_CONTROL") {
-        attributeState "open", label: 'Open', action: "close", icon: "https://raw.githubusercontent.com/a4refillpad/media/master/blind-open.png", backgroundColor: "#e86d13", nextState: "closing"
-        attributeState "closed", label: 'Closed', action: "open", icon: "https://raw.githubusercontent.com/a4refillpad/media/master/blind-closed.png", backgroundColor: "#00A0DC", nextState: "opening"
-        attributeState "partially open", label: 'Partially open', action: "close", icon: "https://raw.githubusercontent.com/a4refillpad/media/master/blind-part-open.png", backgroundColor: "#d45614", nextState: "closing"
-        attributeState "opening", label: 'Opening', action: "pause", icon: "st.thermostat.thermostat-up", backgroundColor: "#e86d13", nextState: "partially open"
-        attributeState "closing", label: 'Closing', action: "pause", icon: "st.thermostat.thermostat-down", backgroundColor: "#00A0DC", nextState: "partially open"
+        attributeState "open", label: 'Open', action: "close", icon: "https://raw.githubusercontent.com/a4refillpad/media/master/blind-open.png", backgroundColor: "#e86d13", nextState: "closed"
+        attributeState "closed", label: 'Closed', action: "open", icon: "https://raw.githubusercontent.com/a4refillpad/media/master/blind-closed.png", backgroundColor: "#00A0DC", nextState: "open"
+        attributeState "partially open", label: 'Partially open', action: "close", icon: "https://raw.githubusercontent.com/a4refillpad/media/master/blind-part-open.png", backgroundColor: "#d45614", nextState: "closed"
       }
       tileAttribute("device.lastCheckin", key: "SECONDARY_CONTROL") {
         attributeState("default", label:'Last Update: ${currentValue}',icon: "st.Health & Wellness.health9")
@@ -85,7 +83,10 @@ def parse(String description) {
 
 		// If response is for battery level
 		if (json.battery_level){
-			sendEvent(name: "battery", value: json.battery_level)
+			// represent batter level as a percentage
+			def battery_percent = json.battery_level - 320
+			if (battery_percent > 100) {battery_percent = 100}
+			sendEvent(name: "battery", value: battery_percent)
 		}
 		// If response is for shade level
 		else if (json.find{ it.key == "position" }){
