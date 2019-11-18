@@ -78,24 +78,34 @@ def parse(String description) {
   def msg = parseLanMessage(description)
 	log.debug "Parsing '${msg}'"
   def json = msg.json
+
+	// If command was executed successfully
 	if (json.result == "success") {
-		log.debug "Success"
+		log.debug "Command executed successfully"
+
+		// If response is for battery level
 		if (json.battery_level){
 			sendEvent(name: "battery", value: json.battery_level)
 		}
+		// If response is for shade level
 		else if (json.find{ it.key == "position" }){
-			def new_level = 100 - json.position
+			def new_level = 100 - json.position  // represent level as % open
 			sendEvent(name: "level", value: new_level)
+
+			// Update shade state
+			if (new_level == 100){
+				sendEvent(name: "windowShade", value: "open")
+			} else if (new_level == 0) {
+				sendEvent(name: "windowShade", value: "closed")
+			} else {
+				sendEvent(name: "windowShade", value: "partially open")
+			}
 		}
+		// If successfull response is from another action, get new shade level
 		else {
 			getLevel()
 		}
 	}
-
-	// TODO: handle 'battery' attribute
-	// TODO: handle 'windowShade' attribute
-	// TODO: handle 'supportedWindowShadeCommands' attribute
-
 }
 
 // handle commands
