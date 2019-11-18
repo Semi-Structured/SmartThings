@@ -83,8 +83,12 @@ def parse(String description) {
 		if (json.battery_level){
 			sendEvent(name: "battery", value: json.battery_level)
 		}
-		if (json.position){
-			sendEvent(name: "level", value: json.position)
+		else if (json.find{ it.key == "position" }){
+			def new_level = 100 - json.position
+			sendEvent(name: "level", value: new_level)
+		}
+		else {
+			getLevel()
 		}
 	}
 
@@ -175,10 +179,11 @@ def setLevel(data) {
     }
 
   data = data.toInteger()
+	def open_level = 100 - data
 
   def result = new physicalgraph.device.HubAction(
     method: "GET",
-    path: "/set_shade_position/${mac_address}/${data}",
+    path: "/set_shade_position/${mac_address}/${open_level}",
     headers: [
       HOST: "${ip_address}:${port}"
       ]
