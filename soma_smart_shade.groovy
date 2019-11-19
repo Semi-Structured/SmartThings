@@ -71,11 +71,11 @@ preferences {
 }
 
 
-// parse events into attributes
-def parse(String description) {
-  def msg = parseLanMessage(description)
-	log.debug "Parsing '${msg}'"
-  def json = msg.json
+// parse callback events into attributes
+void callBackHandler(physicalgraph.device.HubResponse hubResponse) {
+	log.debug "Entered callBackHandler()..."
+	def json = hubResponse.json
+	log.debug "Parsing '${json}'"
 
 	// If command was executed successfully
 	if (json.result == "success") {
@@ -109,6 +109,7 @@ def parse(String description) {
 	}
 }
 
+
 // handle commands
 def open() {
   log.debug "Executing OPEN"
@@ -125,7 +126,9 @@ def open() {
 			path: "/open_shade/${mac_address}",
 			headers: [
 			HOST: "${ip_address}:${port}"
-				]
+			],
+			device.deviceNetworkId,
+			[callback: callBackHandler]
 		)
 		sendHubCommand(result)
 		sendEvent(name: "shade", value: "open")
@@ -148,7 +151,9 @@ def close() {
     path: "/close_shade/${mac_address}",
     headers: [
       HOST: "${ip_address}:${port}"
-      ]
+    ],
+		device.deviceNetworkId,
+		[callback: callBackHandler]
   )
   sendHubCommand(result)
   sendEvent(name: "shade", value: "close")
@@ -171,7 +176,9 @@ def pause() {
     path: "/stop_shade/${mac_address}",
     headers: [
       HOST: "${ip_address}:${port}"
-      ]
+    ],
+		device.deviceNetworkId,
+		[callback: callBackHandler]
   )
   sendHubCommand(result)
   sendEvent(name: "shade", value: "stopped")
@@ -197,7 +204,9 @@ def setLevel(data) {
     path: "/set_shade_position/${mac_address}/${open_level}",
     headers: [
       HOST: "${ip_address}:${port}"
-      ]
+    ],
+		device.deviceNetworkId,
+		[callback: callBackHandler]
   )
   sendHubCommand(result)
   sendEvent(name: "shade", value: "set level ${data}")
@@ -220,7 +229,9 @@ def getLevel() {
     path: "/get_shade_state/${mac_address}",
     headers: [
       HOST: "${ip_address}:${port}"
-      ]
+    ],
+		device.deviceNetworkId,
+		[callback: callBackHandler]
   )
   sendHubCommand(result)
   sendEvent(name: "shade", value: "get level")
@@ -243,7 +254,9 @@ def batteryLevel() {
     path: "/get_battery_level/${mac_address}",
     headers: [
       HOST: "${ip_address}:${port}"
-      ],
+    ],
+		device.deviceNetworkId,
+		[callback: callBackHandler]
   )
   sendHubCommand(result)
   sendEvent(name: "shade", value: "get battery level")
