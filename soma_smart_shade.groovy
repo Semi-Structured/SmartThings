@@ -19,6 +19,7 @@ metadata {
 		capability "Battery"
 		capability "Switch Level"
 		capability "Refresh"
+		capability "Switch"
 	}
 
 
@@ -267,4 +268,13 @@ def batteryLevel() {
 def refresh() {
 	getLevel()
 	batteryLevel()
+}
+
+// Switch capability allows blinds to emulate a switch for compatibility with Google Assistant, etc
+def on() {
+	open()
+}
+
+def off() {
+	close()
 }
