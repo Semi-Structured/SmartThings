@@ -1,4 +1,4 @@
-### SmartThings Device Handler for the Soma Connect
+### SmartThings Device Handler for Soma Smart Shades
 
 This device handler allows you to control your Soma Smart Shades (https://www.somasmarthome.com/) through SmartThings. 
 
